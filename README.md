@@ -30,6 +30,3 @@ Create a .env file with:
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
 
-## 📦 Status
-
-Phase 0 & 1 complete (auth, dashboard). Phase 2 (Resume Reviewer) in progress.
