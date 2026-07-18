@@ -12,4 +12,5 @@ export interface CursorState {
 export interface CursorContextType {
   state: CursorState
   registerHoverable: (el: HTMLElement) => () => void
+  posRef: React.MutableRefObject<{ x: number; y: number; hoverIntensity: number }>
 }

@@ -24,19 +24,17 @@ const COLORS = [
 ]
 
 export default function CursorTrail() {
-  const { state } = useCursor()
+  const { state, posRef } = useCursor()
   const fragsRef = useRef<Fragment[]>([])
   const rafRef = useRef<number>(0)
-  const cursorRef = useRef({ x: -200, y: -200 })
   const lastSpawnRef = useRef(0)
   const containerRef = useRef<HTMLDivElement>(null)
+  const hoverRef = useRef(false)
 
   useEffect(() => {
     if (state.isTouchDevice || state.prefersReducedMotion) return
 
     const spawnFragment = (cx: number, cy: number, isHovering: boolean) => {
-      if (!containerRef.current) return
-
       const el = document.createElement('div')
       const w = Math.random() * 5 + 3
       const h = Math.random() * 4 + 2
@@ -73,28 +71,19 @@ export default function CursorTrail() {
     }
 
     const animate = () => {
-      const cx = cursorRef.current.x
-      const cy = cursorRef.current.y
-      const isHovering = state.isHovering
+      const p = posRef.current
+      const isHovering = hoverRef.current
       const hoverBias = isHovering ? 0.3 : 0
 
-      const dist = Math.sqrt(
-        (state.x - cx) ** 2 + (state.y - cy) ** 2
-      )
-      if (dist > 2) {
-        lastSpawnRef.current++
-        const spawnRate = isHovering ? 1 : 2
-        if (lastSpawnRef.current >= spawnRate) {
-          const count = isHovering ? 2 : 1
-          for (let i = 0; i < count; i++) {
-            spawnFragment(state.x, state.y, isHovering)
-          }
-          lastSpawnRef.current = 0
+      lastSpawnRef.current++
+      const spawnRate = isHovering ? 1 : 2
+      if (lastSpawnRef.current >= spawnRate) {
+        const count = isHovering ? 2 : 1
+        for (let i = 0; i < count; i++) {
+          spawnFragment(p.x, p.y, isHovering)
         }
+        lastSpawnRef.current = 0
       }
-
-      cursorRef.current.x = state.x
-      cursorRef.current.y = state.y
 
       const frags = fragsRef.current
       for (let i = frags.length - 1; i >= 0; i--) {
@@ -113,7 +102,7 @@ export default function CursorTrail() {
         f.y += f.vy
 
         if (isHovering) {
-          f.vy += (state.y - f.y - f.vy * 5) * 0.008
+          f.vy += (p.y - f.y - f.vy * 5) * 0.008
         }
 
         f.rotation += f.rotationSpeed
@@ -130,21 +119,18 @@ export default function CursorTrail() {
       rafRef.current = requestAnimationFrame(animate)
     }
 
-    const onMouseMove = (e: MouseEvent) => {
-      cursorRef.current.x = e.clientX
-      cursorRef.current.y = e.clientY
-    }
-
-    window.addEventListener('mousemove', onMouseMove, { passive: true })
     rafRef.current = requestAnimationFrame(animate)
 
     return () => {
-      window.removeEventListener('mousemove', onMouseMove)
       cancelAnimationFrame(rafRef.current)
       fragsRef.current.forEach((f) => f.el.remove())
       fragsRef.current = []
     }
-  }, [state.isTouchDevice, state.prefersReducedMotion, state.x, state.y, state.isHovering])
+  }, [state.isTouchDevice, state.prefersReducedMotion, posRef])
+
+  useEffect(() => {
+    hoverRef.current = state.isHovering
+  }, [state.isHovering])
 
   return <div ref={containerRef} className="fixed inset-0 pointer-events-none z-[9999]" />
 }

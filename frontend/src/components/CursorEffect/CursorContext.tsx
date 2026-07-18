@@ -5,40 +5,23 @@ const CursorContext = createContext<CursorContextType | null>(null)
 
 const LERP = 0.1
 
-function getInitialState(): CursorState {
-  return {
-    x: -200,
-    y: -200,
-    targetX: -200,
-    targetY: -200,
-    isHovering: false,
-    hoverIntensity: 0,
-    isTouchDevice: false,
-    prefersReducedMotion: false,
-  }
-}
-
 export function CursorProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<CursorState>(getInitialState)
-  const stateRef = useRef(state)
+  const [flags, setFlags] = useState({ isTouchDevice: false, prefersReducedMotion: false, isHovering: false })
+  const posRef = useRef({ x: -200, y: -200, hoverIntensity: 0 })
   const rafRef = useRef<number>(0)
   const hoverableElsRef = useRef<Set<HTMLElement>>(new Set())
 
   const checkDevice = useCallback(() => {
     const touch = !window.matchMedia('(hover: hover) and (pointer: fine)').matches
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    setState((s) => ({ ...s, isTouchDevice: touch, prefersReducedMotion: reduced }))
+    setFlags((s) => ({ ...s, isTouchDevice: touch, prefersReducedMotion: reduced }))
   }, [])
 
   const registerHoverable = useCallback((el: HTMLElement) => {
     hoverableElsRef.current.add(el)
 
-    const onEnter = () => {
-      stateRef.current = { ...stateRef.current, isHovering: true, hoverIntensity: 1 }
-    }
-    const onLeave = () => {
-      stateRef.current = { ...stateRef.current, isHovering: false, hoverIntensity: 0 }
-    }
+    const onEnter = () => { setFlags((s) => ({ ...s, isHovering: true })); posRef.current.hoverIntensity = 1 }
+    const onLeave = () => { setFlags((s) => ({ ...s, isHovering: false })); posRef.current.hoverIntensity = 0 }
 
     el.addEventListener('mouseenter', onEnter)
     el.addEventListener('mouseleave', onLeave)
@@ -66,27 +49,15 @@ export function CursorProvider({ children }: { children: ReactNode }) {
     }
 
     const animate = () => {
-      const s = stateRef.current
-      const lerp = s.isHovering ? LERP * 1.2 : LERP
+      const p = posRef.current
+      const lerp = flags.isHovering ? LERP * 1.2 : LERP
 
-      const nextX = s.x + (targetX - s.x) * lerp
-      const nextY = s.y + (targetY - s.y) * lerp
+      p.x += (targetX - p.x) * lerp
+      p.y += (targetY - p.y) * lerp
 
       const hoverLerp = 0.08
-      const currentHover = s.isHovering
-        ? Math.min(1, s.hoverIntensity + hoverLerp)
-        : Math.max(0, s.hoverIntensity - hoverLerp)
+      p.hoverIntensity += (flags.isHovering ? 1 : 0) * hoverLerp - p.hoverIntensity * hoverLerp
 
-      stateRef.current = {
-        ...s,
-        x: nextX,
-        y: nextY,
-        targetX,
-        targetY,
-        hoverIntensity: currentHover,
-      }
-
-      setState(stateRef.current)
       rafRef.current = requestAnimationFrame(animate)
     }
 
@@ -99,10 +70,21 @@ export function CursorProvider({ children }: { children: ReactNode }) {
       mqlTouch.removeEventListener('change', checkDevice)
       mqlMotion.removeEventListener('change', checkDevice)
     }
-  }, [checkDevice])
+  }, [checkDevice, flags.isHovering])
+
+  const state: CursorState = {
+    x: posRef.current.x,
+    y: posRef.current.y,
+    targetX: posRef.current.x,
+    targetY: posRef.current.y,
+    isHovering: flags.isHovering,
+    hoverIntensity: posRef.current.hoverIntensity,
+    isTouchDevice: flags.isTouchDevice,
+    prefersReducedMotion: flags.prefersReducedMotion,
+  }
 
   return (
-    <CursorContext.Provider value={{ state, registerHoverable }}>
+    <CursorContext.Provider value={{ state, registerHoverable, posRef }}>
       {children}
     </CursorContext.Provider>
   )
