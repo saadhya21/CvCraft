@@ -1,16 +1,13 @@
 import OpenAI from 'openai'
 
-const OPENROUTER_BASE_URL = process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1'
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY
-
-if (!OPENROUTER_API_KEY) {
-  throw new Error('OPENROUTER_API_KEY must be set')
+function getClient(): OpenAI {
+  const key = process.env.OPENROUTER_API_KEY
+  if (!key) throw new Error('OPENROUTER_API_KEY must be set')
+  return new OpenAI({
+    baseURL: process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
+    apiKey: key,
+  })
 }
-
-const client = new OpenAI({
-  baseURL: OPENROUTER_BASE_URL,
-  apiKey: OPENROUTER_API_KEY,
-})
 
 const SYSTEM_PROMPT = `You are an expert resume reviewer and career coach. Analyze the resume image/text provided.
 Return ONLY valid JSON, no markdown fences, no preamble, in this exact shape:
@@ -62,7 +59,7 @@ function parseResponse(raw: string): AnalysisResult {
 }
 
 export async function analyzeResume(base64Image: string): Promise<AnalysisResult> {
-  const response = await client.chat.completions.create({
+  const response = await getClient().chat.completions.create({
     model: 'anthropic/claude-3.5-sonnet',
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
@@ -184,7 +181,7 @@ export async function compareResumes(
     })),
   ]
 
-  const response = await client.chat.completions.create({
+  const response = await getClient().chat.completions.create({
     model: 'anthropic/claude-3.5-sonnet',
     messages: [
       { role: 'system', content: COMPARISON_SYSTEM_PROMPT },
