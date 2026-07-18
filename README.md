@@ -62,6 +62,78 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
+## 📁 Project Structure
+
+```
+cvcraft/
+├── frontend/
+│   ├── src/
+│   │   ├── assets/              # fonts, images, blueprint grid texture
+│   │   ├── components/
+│   │   │   ├── ui/              # buttons, cards, inputs (shared design system)
+│   │   │   ├── layout/          # navbar, sidebar, dashboard shell
+│   │   │   └── cursor/          # copper cursor trail effect
+│   │   ├── features/
+│   │   │   ├── reviewer/        # Resume Reviewer feature
+│   │   │   │   ├── components/
+│   │   │   │   ├── hooks/
+│   │   │   │   └── ReviewerPage.tsx
+│   │   │   ├── selector/        # Resume Selector feature
+│   │   │   │   ├── components/
+│   │   │   │   ├── hooks/
+│   │   │   │   └── SelectorPage.tsx
+│   │   │   └── builder/         # Resume Builder feature
+│   │   │       ├── components/
+│   │   │       ├── hooks/
+│   │   │       └── BuilderPage.tsx
+│   │   ├── auth/                # login, signup, session handling
+│   │   ├── lib/
+│   │   │   └── supabaseClient.ts
+│   │   ├── pages/
+│   │   │   ├── LandingPage.tsx
+│   │   │   └── DashboardPage.tsx
+│   │   ├── types/
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   ├── public/
+│   ├── .env
+│   ├── package.json
+│   ├── tailwind.config.js
+│   └── vite.config.ts
+│
+├── backend/
+│   ├── src/
+│   │   ├── routes/
+│   │   │   ├── reviewer.routes.ts
+│   │   │   ├── selector.routes.ts
+│   │   │   ├── builder.routes.ts
+│   │   │   └── auth.routes.ts
+│   │   ├── controllers/
+│   │   │   ├── reviewer.controller.ts
+│   │   │   ├── selector.controller.ts
+│   │   │   └── builder.controller.ts
+│   │   ├── services/
+│   │   │   ├── openrouter.service.ts   # Claude 3.5 Sonnet calls
+│   │   │   └── supabase.service.ts
+│   │   ├── middleware/
+│   │   │   ├── asyncHandler.ts
+│   │   │   └── auth.middleware.ts
+│   │   ├── types/
+│   │   └── server.ts
+│   ├── .env
+│   ├── package.json
+│   └── tsconfig.json
+│
+├── supabase/
+│   ├── migrations/               # SQL schema files (8-table schema)
+│   └── config.toml
+│
+├── .gitignore
+└── README.md
+```
+
+---
+
 ## 🖥️ User Interface Overview
 
 CvCraft's interface is built around a calm, warm aesthetic with beige/cream backgrounds, espresso-brown text, and copper accents. The app is split into two main zones:
