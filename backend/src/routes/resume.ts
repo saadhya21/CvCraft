@@ -62,7 +62,7 @@ router.post(
     })
 
     const response = await client.chat.completions.create({
-      model: 'anthropic/claude-3.5-sonnet',
+      model: 'openai/gpt-4o-mini',
       messages: [
         { role: 'system', content: 'You are an expert resume writer. Return ONLY valid JSON matching the requested resume structure.' },
         { role: 'user', content: prompt },

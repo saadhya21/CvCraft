@@ -60,7 +60,7 @@ function parseResponse(raw: string): AnalysisResult {
 
 export async function analyzeResume(base64Image: string): Promise<AnalysisResult> {
   const response = await getClient().chat.completions.create({
-    model: 'anthropic/claude-3.5-sonnet',
+    model: 'openai/gpt-4o-mini',
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
       {
@@ -182,7 +182,7 @@ export async function compareResumes(
   ]
 
   const response = await getClient().chat.completions.create({
-    model: 'anthropic/claude-3.5-sonnet',
+    model: 'openai/gpt-4o-mini',
     messages: [
       { role: 'system', content: COMPARISON_SYSTEM_PROMPT },
       { role: 'user', content: userContent },
