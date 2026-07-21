@@ -48,8 +48,8 @@ router.post(
     const timestamp = Date.now()
     const uploadPromises = files.map(async (file) => {
       const safeName = `${timestamp}-${file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')}`
-      const url = await uploadFile(file.buffer, safeName, file.mimetype)
-      return { name: file.originalname, url, storagePath: safeName }
+      try { const url = await uploadFile(file.buffer, safeName, file.mimetype); return { name: file.originalname, url, storagePath: safeName } }
+      catch { return { name: file.originalname, url: '', storagePath: safeName } }
     })
 
     const uploaded = await Promise.all(uploadPromises)
