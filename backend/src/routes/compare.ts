@@ -62,7 +62,7 @@ router.post(
       }
 
       return sharp(imgBuffer)
-        .resize(2048, 2048, { fit: 'inside', withoutEnlargement: true })
+        .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true })
         .png()
         .toBuffer()
     })
@@ -71,10 +71,12 @@ router.post(
     const base64Images = pngBuffers.map((b) => b.toString('base64'))
     const fileNames = files.map((f) => f.originalname)
 
+    console.log(`Comparing ${base64Images.length} resumes, images total size: ${(base64Images.reduce((s, b) => s + b.length, 0) / 1024).toFixed(0)}KB`)
     let comparisonResult
     try {
       comparisonResult = await compareResumes(base64Images, fileNames, jobDescription)
     } catch (err) {
+      console.error('AI comparison error:', err)
       res.status(500).json({ error: `AI comparison failed: ${err instanceof Error ? err.message : 'unknown error'}` })
       return
     }

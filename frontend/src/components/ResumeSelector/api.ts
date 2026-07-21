@@ -63,7 +63,7 @@ async function _compareImpl(_files: File[], _jd: string, names: string[]): Promi
   formData.append('jobDescription', _jd)
 
   const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 30000)
+  const timeout = setTimeout(() => controller.abort(), 120000)
 
   try {
     const res = await fetch(`${API_BASE}/compare`, {
